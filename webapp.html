@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <a href="index.html">Home</a>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Fish Game</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #87CEEB; /* Sky blue */
+            flex-direction: column;
+            text-align: center;
+        }
+
+        canvas {
+            border: 2px solid black;
+        }
+
+        #retryButton {
+            display: none;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+        }
+
+        #retryButton:hover {
+            background-color: #45a049;
+        }
+
+        h1 {
+            font-family: 'Arial', sans-serif;
+            font-size: 36px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        #scoreDisplay, #highScoreDisplay {
+            font-family: 'Arial', sans-serif;
+            font-size: 24px;
+            color: #333;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Swim Fishy!</h1> <!-- Title added here -->
+    <canvas id="gameCanvas"></canvas>
+    <div id="scoreDisplay">Score: 0</div> <!-- Score display -->
+    <div id="highScoreDisplay">High Score: 0</div> <!-- High score display -->
+    <button id="retryButton">Try Again</button>
+
+    <script>
+        // Get the canvas element and context
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Set canvas size
+        canvas.width = 600;
+        canvas.height = 400;
+
+        // Fish object
+        const fish = {
+            x: 100,
+            y: canvas.height / 2,
+            width: 50,
+            height: 40,
+            velocity: 0,
+            gravity: 0.8,
+            lift: -6, // Lower jump height
+            jump: function() {
+                this.velocity = this.lift;
+            },
+            move: function() {
+                this.velocity += this.gravity;
+                this.y += this.velocity;
+
+                // Prevent fish from going off the screen
+                if (this.y < 0) this.y = 0;
+                if (this.y + this.height > canvas.height) this.y = canvas.height - this.height;
+            },
+            draw: function() {
+                ctx.fillStyle = 'blue';
+                ctx.fillRect(this.x, this.y, this.width, this.height); // Draw fish
+            }
+        };
+
+        // Pipe object
+        function Pipe() {
+            this.width = 60;
+            this.height = Math.floor(Math.random() * 200) + 100;
+            this.x = canvas.width;
+            this.gap = 200; // Increased gap for more space between pipes
+            this.speed = 3;
+
+            this.move = function() {
+                this.x -= this.speed;
+            };
+
+            this.draw = function() {
+                ctx.fillStyle = 'green';
+                ctx.fillRect(this.x, 0, this.width, this.height); // Top pipe
+                ctx.fillRect(this.x, this.height + this.gap, this.width, canvas.height - (this.height + this.gap)); // Bottom pipe
+            };
+
+            this.collide = function(fish) {
+                if (
+                    fish.x + fish.width > this.x &&
+                    fish.x < this.x + this.width &&
+                    (fish.y < this.height || fish.y + fish.height > this.height + this.gap)
+                ) {
+                    return true;
+                }
+                return false;
+            };
+        }
+
+        // Game variables
+        let pipes = [];
+        let frame = 0;
+        let gameOver = false;
+        let score = 0;
+        let highScore = localStorage.getItem('highScore') ? parseInt(localStorage.getItem('highScore')) : 0;
+
+        // Event listeners for controlling the fish
+        document.addEventListener('keydown', function(event) {
+            if (event.code === 'Space' && !gameOver) {
+                fish.jump();
+            }
+        });
+
+        // Retry button event
+        document.getElementById('retryButton').addEventListener('click', restartGame);
+
+        // Main game loop
+        function gameLoop() {
+            if (gameOver) return; // Stop game if it's over
+
+            frame++;
+
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Move and draw fish
+            fish.move();
+            fish.draw();
+
+            // Create new pipes
+            if (frame % 60 === 0) {
+                pipes.push(new Pipe());
+            }
+
+            // Move and draw pipes
+            for (let i = pipes.length - 1; i >= 0; i--) {
+                pipes[i].move();
+                pipes[i].draw();
+
+                // Check for collisions
+                if (pipes[i].collide(fish)) {
+                    gameOver = true;
+                    showRetryButton();
+                }
+
+                // Check if fish passed the pipe (scoring)
+                if (pipes[i].x + pipes[i].width < fish.x && !pipes[i].scored) {
+                    score++;
+                    pipes[i].scored = true; // Prevent multiple score increments for the same pipe
+                }
+
+                // Remove pipes that are off-screen
+                if (pipes[i].x + pipes[i].width < 0) {
+                    pipes.splice(i, 1);
+                }
+            }
+
+            // Update score display
+            document.getElementById('scoreDisplay').textContent = `Score: ${score}`;
+
+            // Check if the score is the highest score
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('highScore', highScore); // Save to localStorage
+            }
+
+            // Update high score display
+            document.getElementById('highScoreDisplay').textContent = `High Score: ${highScore}`;
+
+            // Request next frame
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Show retry button when game ends
+        function showRetryButton() {
+            document.getElementById('retryButton').style.display = 'block';
+        }
+
+        // Restart the game
+        function restartGame() {
+            gameOver = false;
+            pipes = [];
+            score = 0;
+            frame = 0;
+            fish.y = canvas.height / 2;
+            fish.velocity = 0;
+            document.getElementById('retryButton').style.display = 'none';
+            gameLoop(); // Restart game loop
+        }
+
+        // Start the game loop
+        gameLoop();
+    </script>
+</body>
+</html>
