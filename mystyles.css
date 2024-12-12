@@ -1,0 +1,39 @@
+body{
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-style: italic;
+}
+.site-heading-lower{
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-style: normal;
+    font-size: larger;
+}
+.mb-3{
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-style: normal;
+}
+a{
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+#mainNav{
+    background-color: rgb(151, 205, 228);
+}
+.cta{
+    background-color:rgb(151, 205, 228);
+}
+.bg-faded{
+    background-color: aliceblue;
+    border-color: cadetblue;
+}
+.btn-primary{
+    background-color: rgb(151, 205, 228);
+    border-color: rgba(71, 132, 157, 0.87);
+}
+.text-faded{
+    color:ghostwhite
+}
+.footer{
+    background-color: rgba(151, 205, 228, 0.707);
+}
+:root{
+    color: rgb(255, 255, 255);
+}

@@ -1,0 +1,16 @@
+body{
+    background-color: rgb(151, 205, 228);
+    color: rgb(255, 255, 255);
+}
+h1{
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+img{
+    border-color: aliceblue;
+    border-style: dashed;
+    border-width: 5px;
+}
+h5{
+    font-weight: lighter;
+    font-size: larger;
+}
